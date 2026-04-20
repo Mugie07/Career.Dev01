@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DevTools — Resume + Jobs</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<div class="shell">
+
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <span class="topbar-logo">dev<span>//</span>tools</span>
+    <span class="topbar-pill">v3.1</span>
+    <div class="api-status">
+      <div class="api-dot" id="api-dot"></div>
+      <span id="api-status-text">Checking tracker API...</span>
+    </div>
+  </header>
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="nav-section">Tools</div>
+    <div class="nav-item active" onclick="switchPanel('resume', this)">
+      <span class="nav-dot"></span> Resume Generator
+    </div>
+    <div class="nav-item" onclick="switchPanel('jobs', this)">
+      <span class="nav-dot"></span> Job Scraper
+    </div>
+    <div class="nav-item" onclick="switchPanel('tracker', this)">
+      <span class="nav-dot"></span> Job Tracker
+      <span class="nav-badge" id="tracker-count">0</span>
+    </div>
+    <div class="nav-section" style="margin-top:8px;">Info</div>
+    <div class="nav-item" onclick="switchPanel('about', this)">
+      <span class="nav-dot"></span> About
+    </div>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <main class="main">
+
+    <!-- ═══════════ RESUME PANEL ═══════════ -->
+    <section class="panel active" id="panel-resume">
+      <div class="panel-header">
+        <div class="panel-title">Resume Generator</div>
+        <div class="panel-sub">Fill in your details → AI crafts a polished resume</div>
+      </div>
+
+      <div class="tabs">
+        <div class="tab active" onclick="resumeTab('info', this)">Personal info</div>
+        <div class="tab" onclick="resumeTab('experience', this)">Experience</div>
+        <div class="tab" onclick="resumeTab('education', this)">Education</div>
+        <div class="tab" onclick="resumeTab('skills', this)">Skills & extra</div>
+        <div class="tab" onclick="resumeTab('generate', this)">Generate ✦</div>
+      </div>
+
+      <!-- TAB: personal info -->
+      <div id="rtab-info">
+        <div class="card">
+          <div class="card-title">Basic details</div>
+          <div class="form-grid">
+            <div class="field"><label>Full name</label><input id="r-name" placeholder="e.g. Osbert Mukasa" /></div>
+            <div class="field"><label>Job title / role</label><input id="r-role" placeholder="e.g. AI Engineer" /></div>
+            <div class="field"><label>Email</label><input id="r-email" type="email" placeholder="you@example.com" /></div>
+            <div class="field"><label>Phone</label><input id="r-phone" placeholder="+256 xxx xxx" /></div>
+            <div class="field"><label>Location</label><input id="r-location" placeholder="e.g. Kampala, Uganda" /></div>
+            <div class="field"><label>LinkedIn / Portfolio URL</label><input id="r-link" placeholder="linkedin.com/in/you" /></div>
+          </div>
+          <div class="form-grid single" style="margin-top:12px;">
+            <div class="field"><label>Professional summary (optional — AI will generate if empty)</label><textarea id="r-summary" placeholder="Brief overview of who you are and what you offer..."></textarea></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: experience -->
+      <div id="rtab-experience" style="display:none;">
+        <div id="exp-blocks"></div>
+        <button class="btn accent2" onclick="addExpBlock()" style="margin-top:10px;">+ Add experience</button>
+      </div>
+
+      <!-- TAB: education -->
+      <div id="rtab-education" style="display:none;">
+        <div id="edu-blocks"></div>
+        <button class="btn accent2" onclick="addEduBlock()" style="margin-top:10px;">+ Add education</button>
+      </div>
+
+      <!-- TAB: skills -->
+      <div id="rtab-skills" style="display:none;">
+        <div class="card">
+          <div class="card-title">Technical skills</div>
+          <div class="field"><textarea id="r-tech-skills" placeholder="Python, PyTorch, OpenCV, Open3D, React, Node.js..." style="min-height:60px;"></textarea></div>
+        </div>
+        <div class="card" style="margin-top:12px;">
+          <div class="card-title">Certifications</div>
+          <div class="field"><textarea id="r-certs" placeholder="AWS Certified Developer, Google IT Support, etc." style="min-height:60px;"></textarea></div>
+        </div>
+        <div class="card" style="margin-top:12px;">
+          <div class="card-title">Projects (highlight 2-3)</div>
+          <div class="field"><textarea id="r-projects" placeholder="Monocular 3D Scene Reconstruction — combines SfM + MiDaS depth estimation..." style="min-height:90px;"></textarea></div>
+        </div>
+        <div class="card" style="margin-top:12px;">
+          <div class="card-title">Languages & hobbies</div>
+          <div class="form-grid">
+            <div class="field"><label>Languages spoken</label><input id="r-languages" placeholder="English, Luganda..." /></div>
+            <div class="field"><label>Interests / hobbies</label><input id="r-hobbies" placeholder="Open source, computer vision..." /></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: generate -->
+      <div id="rtab-generate" style="display:none;">
+        <div class="card">
+          <div class="card-title">AI options</div>
+          <div class="form-grid">
+            <div class="field"><label>Tone</label>
+              <select id="r-tone">
+                <option>Professional & concise</option>
+                <option>Technical & detail-oriented</option>
+                <option>Creative & narrative</option>
+                <option>Executive / leadership</option>
+              </select>
+            </div>
+            <div class="field"><label>Target job (optional)</label><input id="r-target" placeholder="e.g. Computer Vision Engineer at Google" /></div>
+          </div>
+        </div>
+        <div class="btn-row" style="margin-top:4px;">
+          <button class="btn primary" onclick="generateResume()" id="gen-btn">✦ Generate with AI</button>
+          <button class="btn" onclick="buildResumePreview()" id="preview-btn">Preview PDF layout</button>
+          <button class="btn" onclick="downloadTxt()" id="dl-btn" style="display:none;">↓ Download .txt</button>
+        </div>
+        <div id="ai-resume-wrap" style="display:none;">
+          <div class="ai-tag">⬡ AI-generated resume content</div>
+          <div class="ai-output" id="ai-resume-out">
+            <button class="copy-btn" onclick="copyOutput('ai-resume-out')">copy</button>
+            <span id="ai-resume-text"></span>
+          </div>
+        </div>
+        <div id="resume-preview-wrap" style="margin-top:16px;display:none;">
+          <div class="card-title" style="margin-bottom:10px;">PDF preview</div>
+          <div id="resume-preview"></div>
+          <div class="btn-row" style="margin-top:12px;">
+            <button class="btn primary" onclick="printResume()">↓ Download / Print PDF</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════ JOBS PANEL ═══════════ -->
+    <section class="panel" id="panel-jobs">
+      <div class="panel-header">
+        <div class="panel-title">Remote Job Scraper</div>
+        <div class="panel-sub">Finds remote jobs open to <strong style="color:var(--accent)">Uganda / East Africa</strong> — region-locked jobs are hidden</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Search parameters</div>
+        <div class="jobs-controls">
+          <div class="field" style="flex:2;min-width:200px;"><label>Keywords / role</label><input id="j-query" placeholder="AI engineer, React developer, data scientist..." /></div>
+          <div class="field"><label>Experience level</label>
+            <select id="j-level">
+              <option value="">Any level</option>
+              <option>Junior</option>
+              <option>Mid-level</option>
+              <option>Senior</option>
+              <option>Lead</option>
+            </select>
+          </div>
+          <div class="field"><label>Category</label>
+            <select id="j-category">
+              <option value="">All categories</option>
+              <option>Engineering</option>
+              <option>Design</option>
+              <option>Data / AI / ML</option>
+              <option>Product</option>
+              <option>Marketing</option>
+              <option>DevOps</option>
+              <option>Writing</option>
+            </select>
+          </div>
+        </div>
+        <div class="btn-row" style="margin-top:14px;">
+          <button class="btn primary" onclick="scrapeJobs()" id="scrape-btn">⬡ Scrape jobs</button>
+          <button class="btn" onclick="clearJobs()">Clear</button>
+        </div>
+      </div>
+
+      <div class="status-bar" id="job-status" style="display:none;">
+        <div class="status-dot" id="status-dot"></div>
+        <span id="status-msg">Initialising scrape...</span>
+      </div>
+
+      <div id="jobs-output">
+        <div class="empty-state">
+          <div class="es-icon">⬡</div>
+          <p>Set your criteria and hit <strong style="color:var(--text)">Scrape jobs</strong> to fetch listings open to Uganda</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════ TRACKER PANEL ═══════════ -->
+    <section class="panel" id="panel-tracker">
+      <div class="panel-header">
+        <div class="panel-title">Job Tracker</div>
+        <div class="panel-sub">All your saved applications — update status as you progress</div>
+      </div>
+
+      <div id="tracker-offline-banner" class="api-offline-banner" style="display:none;">
+        ⚠ Tracker API offline. Run: <code style="margin-left:6px;background:rgba(244,106,106,0.1);padding:2px 6px;border-radius:3px;">uvicorn app.main:app --reload</code>
+      </div>
+
+      <div class="tracker-stats">
+        <div class="stat-card applied"><div class="stat-num" id="stat-applied">0</div><div class="stat-label">Applied</div></div>
+        <div class="stat-card interview"><div class="stat-num" id="stat-interview">0</div><div class="stat-label">Interview</div></div>
+        <div class="stat-card hired"><div class="stat-num" id="stat-hired">0</div><div class="stat-label">Hired</div></div>
+        <div class="stat-card rejected"><div class="stat-num" id="stat-rejected">0</div><div class="stat-label">Rejected</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Add application manually</div>
+        <div class="form-grid">
+          <div class="field"><label>Company</label><input id="t-company" placeholder="e.g. Cognizant" /></div>
+          <div class="field"><label>Role</label><input id="t-role" placeholder="e.g. AI Engineer" /></div>
+          <div class="field"><label>Status</label>
+            <select id="t-status">
+              <option value="applied">Applied</option>
+              <option value="interview">Interview</option>
+              <option value="hired">Hired</option>
+              <option value="rejected">Rejected</option>
+            </select>
+          </div>
+          <div style="display:flex;align-items:flex-end;">
+            <button class="btn primary" onclick="manualAddJob()" style="width:100%;">+ Add</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="tracker-output">
+        <div class="empty-state">
+          <div class="es-icon">⬡</div>
+          <p>No applications yet. Save from the scraper or add manually above.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════ ABOUT PANEL ═══════════ -->
+    <section class="panel" id="panel-about">
+      <div class="panel-header">
+        <div class="panel-title">About DevTools</div>
+        <div class="panel-sub">Three tools, one interface</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Resume Generator</div>
+        <p style="color:var(--muted);font-size:13px;line-height:1.8;">Uses Claude AI to craft professional, ATS-friendly resume content. Supports multiple tones, targeted job descriptions, and exports to PDF.</p>
+      </div>
+      <div class="card">
+        <div class="card-title">Job Scraper</div>
+        <p style="color:var(--muted);font-size:13px;line-height:1.8;">AI-powered job finder that only shows listings genuinely open to Uganda and East Africa. Region-locked jobs are automatically filtered out. Save any listing directly to the tracker.</p>
+      </div>
+      <div class="card">
+        <div class="card-title">Job Tracker</div>
+        <p style="color:var(--muted);font-size:13px;line-height:1.8;">Connected to your local FastAPI backend (http://127.0.0.1:8000). Persists all applications to SQLite and lets you track status through the hiring pipeline.</p>
+      </div>
+      <div class="card">
+        <div class="card-title">File structure</div>
+        <p style="color:var(--muted);font-size:13px;font-family:var(--mono);line-height:2;">
+          devtools.html &nbsp;← shell &amp; layout<br>
+          css/styles.css &nbsp;← all styles<br>
+          js/utils.js &nbsp;&nbsp;&nbsp;&nbsp;← shared helpers<br>
+          js/resume.js &nbsp;&nbsp;&nbsp;← resume logic<br>
+          js/scraper.js &nbsp;&nbsp;← scraper + region filter<br>
+          js/tracker.js &nbsp;&nbsp;← tracker API calls
+        </p>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- Scripts loaded in dependency order -->
+<script src="js/utils.js"></script>
+<script src="js/resume.js"></script>
+<script src="js/scraper.js"></script>
+<script src="js/tracker.js"></script>
+
+</body>
+</html>
